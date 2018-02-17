@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    {{ super() }}
+    <link href="{{url_for('static', filename='css/accounts.css') }}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.16/sl-1.2.5/datatables.min.css"/>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.16/sl-1.2.5/datatables.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+    <script type=text/javascript src="{{url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <!-- Navigation -->
+    <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('view_accounts') }}">Aggregator</a>
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('view_accounts') }}">Accounts</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('logout') }}">Log out</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+
+    <div class="container" id="dashboardContainer">
+
+        <canvas id="category-chart" class="chart"></canvas>
+        <script type="text/javascript">
+            var myDoughnutChart = new Chart(document.getElementById('category-chart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: {{ category_chart_data[0] }},
+                        backgroundColor: {{ category_chart_data[1]|tojson }}
+                    }],
+                    labels: {{ category_chart_data[2]|tojson }}
+                }
+            });
+        </script>
+
+    </div>
+
+
+{% endblock %}

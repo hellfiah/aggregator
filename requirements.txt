@@ -1,0 +1,7 @@
+Flask
+psycopg2
+SQLAlchemy
+flask_login
+flask_bootstrap
+flask_wtf
+werkzeug

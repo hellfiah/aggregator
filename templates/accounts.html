@@ -1,0 +1,260 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    {{ super() }}
+    <link href="{{url_for('static', filename='css/accounts.css') }}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.16/sl-1.2.5/datatables.min.css"/>
+    <script type=text/javascript src="{{url_for('static', filename='js/accounts.js') }}"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.16/sl-1.2.5/datatables.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <!-- Navigation -->
+    <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('view_accounts') }}">Aggregator</a>
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('view_accounts') }}">Accounts</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('logout') }}">Log out</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+
+    <div class="container" id="dashboardContainer">
+
+        <div class="row top-buffer">
+            <div class="col-md-3">
+
+
+                <!-- Filter component -->
+                <div id="transaction-filter-component" class="col-md-12">
+                    <div class="sub-header">Filters</div>
+                    <input type="text" id="transaction-name-filter" placeholder="Transaction name">
+
+
+                    <!-- Account filter component -->
+                    <div>Accounts</div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="select-all" id="select-all-accounts-check" checked>
+                      <label class="form-check-label" for="select-all-accounts-check">
+                        Select all
+                      </label>
+                    </div>
+                    {% for account in accounts %}
+                        <div class="form-check account-check-div">
+                          <input class="form-check-input account-check" type="checkbox" value="{{ account.name }}" id="{{ account.name | replace(" ","-")  }}-check" checked>
+                          <label class="form-check-label" for="{{ account.name | replace(" ","-")  }}-check">
+                            {{ account.name }}
+                          </label>
+                        </div>
+                    {% endfor %}
+                    <ul>
+                        <li class="text-link-hover" data-toggle="modal" data-target="#myModal">
+                            <i class="fas fa-plus-circle"></i>
+                            <a>Add account</a>
+                        </li>
+                    </ul>
+
+
+                    <!-- Category filter component -->
+                    <div>Category</div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="select-all" id="select-all-categories-check" checked>
+                      <label class="form-check-label" for="select-all-categories-check">
+                        Select all
+                      </label>
+                    </div>
+                        {% for unique_category in unique_categories %}
+                    <div class="form-check category-check-div">
+                      <input class="form-check-input category-check" type="checkbox" value="{{ unique_category }}" id="{{ unique_category }}-check" checked>
+                      <label class="form-check-label" for="{{ unique_category }}-check">
+                        {{ unique_category }}
+                      </label>
+                    </div>
+
+                        {% endfor %}
+
+                </div>
+
+
+                <!--show all of the user's uploads -->
+                <div class="top-buffer col-md-12">
+                    <span class="sub-header">Uploads</span>
+                    <span id="upload-edit" class="text-link-hover">edit</span>
+                    <ul class="list-group">
+                        {% for upload in uploads %}
+                            <li class="list-group-item text-link-hover account clickable-panel" upload-id={{ upload.id }}>
+                                {% if upload.name|length > 22 %}
+                                    <a>{{ upload.name[:9] + '...' + upload.name[upload.name|length-9:] }}</a>
+                                {% else %}
+                                    <a>{{ upload.name }}</a>
+                                {% endif %}
+                                <span class="remove-upload-cross">
+                                    <i class="fas fa-times remove-cross"></i>
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- upload file component -->
+                {% if displayed_account is not none %}
+                <div class="top-buffer col-md-12">
+                    <form method=post enctype=multipart/form-data action="uploadFile" id="uploadFileForm">
+                        {{ upload_form.csrf_token }}
+                        {{ upload_form.upload_account_id }}
+                        {{ upload_form.csv_file }}
+                      <p>Drag your files here or click to upload</p>
+                      <button class="btn btn-primary" type=submit>Upload File</button>
+                    </form>
+                </div>
+                {% endif %}
+
+                                            <!--show all of the user's accounts -->
+                <a class="sub-header text-link-hover" href="{{ url_for('view_accounts') }}">Accounts</a>
+                <span id="account-edit" class="text-link-hover">edit</span>
+                <ul class="list-group">
+                {% for account in accounts %}
+                    {% if account.id == displayed_account %}
+                        <li class="list-group-item text-link-hover account clickable-panel selected" account-id={{ account.id }}>
+                    {% else %}
+                        <li class="list-group-item text-link-hover account clickable-panel" account-id={{ account.id }}>
+                    {% endif %}
+
+                        <a class="account-name" href="{{ url_for('view_account', account_id=account.id) }}">
+                            {{ account.name }}
+                        </a>
+                        <span class="remove-account-cross">
+                            <i class="fas fa-times remove-cross"></i>
+                        </span>
+                    </li>
+                {% endfor %}
+                    <li class="list-group-item text-link-hover" data-toggle="modal" data-target="#myModal">
+                        <i class="fas fa-plus-circle"></i>
+                        <a>Add account</a>
+                    </li>
+                </ul>
+            </div>
+
+
+
+
+
+            <!-- show transactions section -->
+            <div class="col-md-9">
+
+                <div class="panel panel-default">
+                  <div class="panel-body">
+               {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <a>{{ message }}</a>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                  </div>
+                </div>
+
+                <table id="transaction-table" class="table table-hover">
+                    <thead><td>Date</td><td>Name</td><td>Account</td></td><td>Category</td><td>Amount</td></thead>
+                    {% for transaction in transactions %}
+
+                    <tr class="transaction-row" transaction-id={{ transaction.id }}>
+                        <td>{{ transaction.date }}</td>
+                        <td>{{ transaction.name }}</td>
+                        <td>{{ transaction.account.name }}</td>
+                        <td>{{ transaction.category.name }}</td>
+                        <!--<td>
+                            {% if transaction.upload.name|length > 26 %}
+                                <a>{{ transaction.upload.name[:9] + '...' + transaction.upload.name[transaction.upload.name|length-15:] }}</a>
+                            {% else %}
+                                <a>{{ transaction.category.name }}</a>
+                            {% endif %}
+                        </td>-->
+                        <td>{{ transaction.amount }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- Add account pop up -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Add account</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+            <form method="POST" action="/view_accounts/addAccount">
+              <div class="modal-body">
+                    <a>Select account type:</a>
+                    <div>
+                        {{ add_account_form.csrf_token }}
+                        {{ add_account_form.type_id }}
+                    </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Add Account</button>
+              </div>
+           </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- General modal -->
+    <div class="modal fade" id="pop-up-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="main-modal-body">
+            <h4>Are you sure you want to remove this account?</h4>
+            <p>This will delete all transactions associated with this account, which can not be undone.</p>
+          </div>
+          <div class="modal-footer" id="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <form method="POST" action="/view_accounts/removeAccount">
+                {{ remove_account_form.csrf_token }}
+                {{ remove_account_form.remove_account_id }}
+                <button type="submit" class="btn btn-primary">Yes</button>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- right click dropdown -->
+
+    <div id="side-toolbar">
+        <div class="side-toolbar-option text-link-hover" data-action="categorise-this">Categorise</div>
+        <div class="side-toolbar-option text-link-hover" data-action="categorise-all-similar">Categorise all like this</div>
+        <div class="side-toolbar-option text-link-hover" data-action="cancel-selection">Cancel Selection</div>
+    </div>
+
+{% endblock %}

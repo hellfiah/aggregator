@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    {% block head %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>{% block title %}{% endblock %}Aggregator</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="../static/css/layout.css" rel="stylesheet">
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+    <!-- CSRF safety measure -->
+    <script type="text/javascript">
+      var csrf_token = "{{ csrf_token() }}";
+
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrf_token);
+              }
+          }
+      });
+    </script>
+    {% endblock %}
+  </head>
+
+  <body>
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+  </body>
+</html>
